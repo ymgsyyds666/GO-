@@ -1,5 +1,12 @@
 package main
 import "fmt"
+type w int
 func main() {
-  fmt.Println("Hello, World!")
+   
+  const(
+    a w=iota
+    b
+    c
+  )
+  fmt.Println(a,b,c)
 }
