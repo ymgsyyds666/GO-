@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Go 架构师 30 天 · 学习地图</title>
+<style>
+  :root {
+    --bg: #0a0c10;
+    --panel: #11141b;
+    --panel-2: #151925;
+    --line: #222836;
+    --text: #e7eaf0;
+    --muted: #8d96a9;
+    --accent: #00add8;
+    --accent-soft: rgba(0, 173, 216, .12);
+    --mint: #7ef0c0;
+    --warn: #ffb86b;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", "SF Pro Text", "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    width: min(1120px, calc(100% - 48px));
+    margin: 0 auto;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    padding: 96px 0 64px;
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+    background:
+      radial-gradient(700px 320px at 18% -10%, rgba(0, 173, 216, .22), transparent 70%),
+      radial-gradient(520px 260px at 88% 0%, rgba(126, 240, 192, .10), transparent 70%);
+  }
+
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, .025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, .025) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: linear-gradient(to bottom, #000 10%, transparent 85%);
+    pointer-events: none;
+  }
+
+  .hero .wrap { position: relative; z-index: 1; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid rgba(0, 173, 216, .35);
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .14em;
+  }
+
+  .badge i {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+  }
+
+  h1 {
+    margin: 22px 0 14px;
+    font-size: clamp(34px, 5.2vw, 58px);
+    line-height: 1.08;
+    letter-spacing: -.03em;
+    font-weight: 700;
+  }
+
+  h1 em {
+    font-style: normal;
+    background: linear-gradient(100deg, var(--accent), var(--mint));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .lede {
+    max-width: 660px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 17px;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 44px;
+  }
+
+  .stats div {
+    padding: 18px 20px;
+    background: rgba(17, 20, 27, .72);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    backdrop-filter: blur(6px);
+  }
+
+  .stats b {
+    display: block;
+    font-size: 30px;
+    line-height: 1.1;
+    letter-spacing: -.02em;
+  }
+
+  .stats span { color: var(--muted); font-size: 13px; }
+
+  /* ---------- Sections ---------- */
+  section { padding: 64px 0 8px; }
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 0 0 26px;
+    font-size: 24px;
+    letter-spacing: -.02em;
+  }
+
+  h2::before {
+    content: "";
+    width: 4px; height: 22px;
+    border-radius: 2px;
+    background: linear-gradient(var(--accent), var(--mint));
+  }
+
+  /* ---------- Progress ---------- */
+  .progress-card {
+    padding: 20px 22px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    margin-bottom: 22px;
+  }
+
+  .progress-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .progress-head strong {
+    color: var(--accent);
+    font-size: 20px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bar {
+    height: 8px;
+    border-radius: 999px;
+    background: #1b2130;
+    overflow: hidden;
+  }
+
+  .bar i {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--accent), var(--mint));
+    transition: width .35s ease;
+  }
+
+  .hint { margin: 10px 0 0; font-size: 12.5px; color: #6f7889; }
+
+  /* ---------- Weeks ---------- */
+  .weeks {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .week {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 18px;
+  }
+
+  .week header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .week h3 {
+    margin: 0;
+    font-size: 15px;
+    letter-spacing: .01em;
+  }
+
+  .week .tag {
+    font-size: 11px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 999px;
+    padding: 2px 9px;
+    white-space: nowrap;
+  }
+
+  .week .goal {
+    margin: 0 0 14px;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
+  .day {
+    display: flex;
+    align-items: baseline;
+    gap: 9px;
+    width: 100%;
+    padding: 7px 8px;
+    margin: 2px 0;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, opacity .15s;
+  }
+
+  .day:hover { background: var(--panel-2); border-color: var(--line); }
+
+  .day .n {
+    flex: 0 0 28px;
+    color: var(--muted);
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .day.done { opacity: .45; }
+  .day.done .n { color: var(--mint); }
+  .day.done .t { text-decoration: line-through; text-decoration-color: rgba(126, 240, 192, .5); }
+
+  /* ---------- Cards ---------- */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 22px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    color: inherit;
+    text-decoration: none;
+    transition: transform .18s ease, border-color .18s ease, background .18s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(0, 173, 216, .45);
+    background: var(--panel-2);
+  }
+
+  .card .kicker {
+    font-size: 11px;
+    letter-spacing: .16em;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .card h3 { margin: 0; font-size: 18px; letter-spacing: -.01em; }
+
+  .card p { margin: 0; color: var(--muted); font-size: 13.5px; }
+
+  .card .meta {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #6f7889;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .card .meta b { color: var(--mint); font-weight: 500; }
+
+  /* ---------- Code / rules ---------- */
+  pre {
+    margin: 0 0 14px;
+    padding: 20px 22px;
+    background: #0d1017;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow-x: auto;
+    font-size: 13.5px;
+    line-height: 1.75;
+    color: #c8d2e3;
+  }
+
+  code { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace; }
+
+  .rules {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: r;
+    display: grid;
+    gap: 12px;
+  }
+
+  .rules li {
+    counter-increment: r;
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 14px;
+    align-items: start;
+    padding: 16px 18px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 13px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .rules li::before {
+    content: counter(r, decimal-leading-zero);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    padding-top: 2px;
+  }
+
+  .rules b { color: var(--text); font-weight: 600; }
+
+  footer {
+    margin-top: 72px;
+    padding: 28px 0 40px;
+    border-top: 1px solid var(--line);
+    color: #5e6778;
+    font-size: 12.5px;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 900px) {
+    .weeks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 620px) {
+    .wrap { width: calc(100% - 32px); }
+    .hero { padding: 64px 0 44px; }
+    .weeks, .cards { grid-template-columns: 1fr; }
+    section { padding-top: 44px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="badge"><i></i>GO · 30 DAYS</span>
+    <h1>从 Go 小白<br>到<em>独立架构师</em></h1>
+    <p class="lede">
+      7 篇文档、5 个可运行示例、3 个递进项目。每天 3 小时，一条从语法到服务端、
+      再到 AI / OCR 工程化的完整路径。
+    </p>
+    <div class="stats">
+      <div><b>4</b><span>周节奏</span></div>
+      <div><b>7</b><span>篇核心文档</span></div>
+      <div><b>5</b><span>个示例程序</span></div>
+      <div><b>3</b><span>个实战项目</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="plan">
+    <div class="wrap">
+      <h2>30 天路线</h2>
+
+      <div class="progress-card">
+        <div class="progress-head">
+          <span>打卡进度</span>
+          <strong id="pct">0%</strong>
+        </div>
+        <div class="bar"><i id="bar"></i></div>
+        <p class="hint">点击任意天数标记完成，进度保存在本地浏览器（localStorage），换设备不同步。</p>
+      </div>
+
+      <div class="weeks" id="weeks"></div>
+    </div>
+  </section>
+
+  <section id="docs">
+    <div class="wrap">
+      <h2>核心文档</h2>
+      <div class="cards" id="cards"></div>
+    </div>
+  </section>
+
+  <section id="run">
+    <div class="wrap">
+      <h2>先跑起来</h2>
+      <pre><code>cd go-architect-30d\code
+$env:GOOS='windows'; $env:GOARCH='386'    # 仅当你把 GOOS 设成过 linux
+
+go run ./basics          # 语法：切片 / map / 接口 / 泛型 / 错误链
+go run ./concurrency     # 并发：worker pool / pipeline / 限流 / 超时
+go run ./web             # HTTP：中间件链 + 优雅关闭
+go run ./ocr             # OCR：灰度化 + Otsu 二值化
+go run ./llm             # LLM：SSE 流式解析（内置假服务，无需 API Key）</code></pre>
+      <p class="hint">全部基于标准库，无需下载依赖；每个程序自带断言，跑通即验证。</p>
+    </div>
+  </section>
+
+  <section id="rules">
+    <div class="wrap">
+      <h2>三条铁律</h2>
+      <ol class="rules">
+        <li><span><b>只跑通不算会，能改才算会。</b>每段示例敲完，必须做一次破坏性修改：改并发数、去掉 defer、把缓冲 channel 换成无缓冲，观察会发生什么。</span></li>
+        <li><span><b>先跑通，再优雅。</b>第一遍用 log.Printf 和 println 都行；分层、接口、依赖注入是第二轮的事。不要一上来就学 K8s 和 DDD。</span></li>
+        <li><span><b>每天一个 commit，每周一个能跑的项目。</b>GitHub 的提交记录和 README，比任何证书都更能证明你会写 Go。</span></li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <span>Go 架构师 30 天 · 配套文档与可运行示例</span>
+  <span>用 Typora / VS Code 打开 Markdown 阅读体验更好</span>
+</footer>
+
+<script>
+  const weeks = [
+    {
+      tag: "D1–D7",
+      title: "Week 1 · 语言地基",
+      goal: "语法全过一遍，能独立写小工具",
+      days: [
+        [1, "环境、工具链、变量与类型"],
+        [2, "流程控制、函数、defer 与闭包"],
+        [3, "数组、切片、map 的内存模型"],
+        [4, "结构体、方法集、接口与组合"],
+        [5, "错误处理、错误链、泛型"],
+        [6, "标准库实战：io / json / slog / time"],
+        [7, "GoScan v0 + LeetCode 20 题"]
+      ]
+    },
+    {
+      tag: "D8–D14",
+      title: "Week 2 · 并发与工程化",
+      goal: "写出不泄漏、可压测、能排障的并发代码",
+      days: [
+        [8, "goroutine 与 GMP 调度模型"],
+        [9, "channel、select 与超时控制"],
+        [10, "sync、atomic 与内存模型"],
+        [11, "context 的取消与传播"],
+        [12, "worker pool / pipeline / 限流 / singleflight"],
+        [13, "测试、benchmark、pprof、GC 调优"],
+        [14, "GoScan v1：并发化 + pprof 优化"]
+      ]
+    },
+    {
+      tag: "D15–D21",
+      title: "Week 3 · 服务端",
+      goal: "独立交付一个可上线的 API 服务",
+      days: [
+        [15, "HTTP 原理、net/http、优雅关闭"],
+        [16, "Gin：路由、校验、中间件、JWT"],
+        [17, "MySQL：连接池、事务、索引、迁移"],
+        [18, "Redis：缓存三兄弟、分布式锁"],
+        [19, "gRPC、protobuf 与服务治理"],
+        [20, "可观测性与 Docker/K8s 部署"],
+        [21, "短链服务：压测、瓶颈分析"]
+      ]
+    },
+    {
+      tag: "D22–D30",
+      title: "Week 4 · 架构与 AI",
+      goal: "能设计、能取舍，并把 AI 接进系统",
+      days: [
+        [22, "容量估算、分层、DDD-lite"],
+        [23, "稳定性：限流、熔断、幂等、SLO"],
+        [24, "OCR 四条路线与选型"],
+        [25, "LLM 接入：SSE、结构化输出"],
+        [26, "RAG：切分、embedding、向量检索"],
+        [27, "DocFlow：OCR + LLM 文档平台"],
+        [28, "架构复盘、ADR、Code Review"],
+        [29, "查漏补缺：60 项自检清单"],
+        [30, "输出：博客、简历、模拟面试"]
+      ]
+    }
+  ];
+
+  const docs = [
+    {
+      kicker: "MAIN",
+      title: "README · 总纲",
+      desc: "30 天总表、每日节奏模板、阶段自检、资源速查。先读这一篇。",
+      link: "README.md",
+      meta: ["全程", "入口"]
+    },
+    {
+      kicker: "01",
+      title: "语言基础",
+      desc: "从变量到泛型的完整语法，每节配套练习；附刷题网站与「语法点 → 题号」映射表。",
+      link: "01-语言基础.md",
+      meta: ["D1–D7", "刷题"]
+    },
+    {
+      kicker: "02",
+      title: "并发与工程化",
+      desc: "GMP、channel、sync、context、pprof；5 个必须手写的并发模式与 12 条陷阱清单。",
+      link: "02-并发与工程化.md",
+      meta: ["D8–D14", "并发"]
+    },
+    {
+      kicker: "03",
+      title: "服务端开发",
+      desc: "Gin / go-zero / Kratos 选型与实战，MySQL、Redis、MQ、gRPC、可观测、部署，以及 60 项自检清单。",
+      link: "03-服务端开发.md",
+      meta: ["D15–D21", "饭碗"]
+    },
+    {
+      kicker: "04",
+      title: "AI 与 OCR",
+      desc: "云 API / Tesseract / PaddleOCR / ONNX 四条路线对比，LLM 流式与结构化输出，RAG 落地。",
+      link: "04-AI与OCR.md",
+      meta: ["D22–D26", "差异化"]
+    },
+    {
+      kicker: "05",
+      title: "架构师之路",
+      desc: "容量估算公式与算例、高并发五杠杆、一致性方案、稳定性工程、ADR 与 Code Review 清单。",
+      link: "05-架构师之路.md",
+      meta: ["D22 / D28", "方法论"]
+    },
+    {
+      kicker: "06",
+      title: "实战项目",
+      desc: "GoScan → 短链服务 → DocFlow，三个项目的需求、里程碑、验收标准与面试讲法。",
+      link: "06-实战项目.md",
+      meta: ["全程", "作品集"]
+    },
+    {
+      kicker: "CODE",
+      title: "可运行示例",
+      desc: "5 个纯标准库程序，自带断言；跑通即验证文档里的关键行为。",
+      link: "code/README.md",
+      meta: ["Go 1.25", "可直接运行"]
+    }
+  ];
+
+  const KEY = "go-architect-30d-progress";
+
+  function loadState() {
+    try {
+      return JSON.parse(localStorage.getItem(KEY) || "{}");
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveState(state) {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(state));
+    } catch (e) {
+      /* 隐私模式忽略 */
+    }
+  }
+
+  let state = loadState();
+
+  function pctDone() {
+    const total = 30;
+    const done = Object.keys(state).filter(function (k) { return state[k]; }).length;
+    return Math.round((done / total) * 100);
+  }
+
+  function updateProgress() {
+    const pct = pctDone();
+    document.getElementById("pct").textContent = pct + "%";
+    document.getElementById("bar").style.width = pct + "%";
+  }
+
+  function renderWeeks() {
+    const root = document.getElementById("weeks");
+    weeks.forEach(function (w) {
+      const box = document.createElement("div");
+      box.className = "week";
+
+      const head = document.createElement("header");
+      head.innerHTML = "<h3></h3><span class='tag'></span>";
+      head.querySelector("h3").textContent = w.title;
+      head.querySelector(".tag").textContent = w.tag;
+      box.appendChild(head);
+
+      const goal = document.createElement("p");
+      goal.className = "goal";
+      goal.textContent = w.goal;
+      box.appendChild(goal);
+
+      w.days.forEach(function (d) {
+        const day = document.createElement("button");
+        day.className = "day";
+        day.type = "button";
+        day.dataset.day = d[0];
+        day.innerHTML = "<span class='n'>D" + d[0] + "</span><span class='t'></span>";
+        day.querySelector(".t").textContent = d[1];
+
+        if (state[d[0]]) {
+          day.classList.add("done");
+          day.setAttribute("aria-pressed", "true");
+        }
+
+        day.addEventListener("click", function () {
+          const id = d[0];
+          state[id] = !state[id];
+          day.classList.toggle("done", !!state[id]);
+          day.setAttribute("aria-pressed", String(!!state[id]));
+          saveState(state);
+          updateProgress();
+        });
+
+        box.appendChild(day);
+      });
+
+      root.appendChild(box);
+    });
+  }
+
+  function renderDocs() {
+    const root = document.getElementById("cards");
+    docs.forEach(function (d) {
+      const a = document.createElement("a");
+      a.className = "card";
+      a.href = d.link;
+
+      const kicker = document.createElement("span");
+      kicker.className = "kicker";
+      kicker.textContent = d.kicker;
+      a.appendChild(kicker);
+
+      const h = document.createElement("h3");
+      h.textContent = d.title;
+      a.appendChild(h);
+
+      const p = document.createElement("p");
+      p.textContent = d.desc;
+      a.appendChild(p);
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.innerHTML = "<b></b><span></span>";
+      meta.querySelector("b").textContent = d.meta[0] + " · " + d.meta[1];
+      meta.querySelector("span").textContent = "打开 →";
+      a.appendChild(meta);
+
+      root.appendChild(a);
+    });
+  }
+
+  renderWeeks();
+  renderDocs();
+  updateProgress();
+</script>
+</body>
+</html>
